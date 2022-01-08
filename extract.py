@@ -13,8 +13,7 @@ import datetime
 import random
 import os
 #from selenium.webdriver.chrome.service import Service
-#import pandas as pd
-#from pandas import DataFrame
+
 
 logging.basicConfig(
     format="%(asctime)-15s [%(levelname)s] %(funcName)s: %(message)s",
@@ -104,84 +103,3 @@ time.sleep(random.uniform(8, 12))
 
 printing_html(chrome_browser, raw_file + '_1.html')
 time.sleep(random.uniform(2, 4))
-
-'''path_element = chrome_browser.find_elements(By.CLASS_NAME, "ma-AdList")
-print(len(path_element))
-print(path_element.__class__)
-print(path_element[0])
-html = driver.page_source
-time.sleep(2)
-print(html)
-#driver.quit()
-
-
-try:
-    from BeautifulSoup import BeautifulSoup
-except ImportError:
-    from bs4 import BeautifulSoup
-parsed_html = BeautifulSoup(html, features="html.parser")
-print(parsed_html.body.find('div', attrs={'class':'ma-AdList'}).text)
-
-
-print('FIN')
-'''
-'''
-import time
-import pandas as pd
-from pandas import DataFrame
-import urllib.request, urllib.error, urllib.parse
-from bs4 import BeautifulSoup
-import os
-import datetime
-import requests
-
-ts = datetime.datetime.now()
-
-url = 'https://www.milanuncios.com/coches-de-segunda-mano/?demanda=n&orden=date&fromSearch=1'
-
-# This will yield only the HTML code
-response = requests.get(url)
-
-print(response.text)
-
-print(dir(response))
-
-print(response.headers)
-
-print(response.status_code)
-
-exit()
-
-'''
-
-'''
-url = 'https://www.milanuncios.com/coches-de-segunda-mano/?demanda=n&orden=date&fromSearch=1'
-
-response = urllib.request.urlopen(url)
-webContent = response.read().decode('UTF-8')
-
-#TODO
-# Add to cheatsheet how to print a timestamp
-# 1. Navigate to the project local folder with a terminal
-# 2. Make sure that the repository exists 
-# https://stackoverflow.com/questions/25947059/git-clone-repository-not-found/57117454#57117454 comentar que necesité poner password a la key ssh para clonar repositorio privado
-# 3. Get wd in python
-
-'''
-'''
-f = open('pegaso-collect/raw-data/ma-data-' + ts.isoformat() + '.html', 'w')
-f.write(response.text)
-f.close()
-project_folder = os.getcwd()
-raw_data_folder = 'pegaso-collect/raw-data'
-file = project_folder + '/' + raw_data_folder + '/' + 'ma-data-2022-01-04T00:34:57.965655.html'
-f = open(file, 'r')
-html = f.read()
-parsed_html = BeautifulSoup(html, features="html.parser")
-#print(parsed_html.body.find('div', attrs={'class':'ma-AdCard-detail'}).text)
-#print( parsed_html.find_all("'class':'ma-AdCard-detail'") )
-
-for foo in parsed_html.find_all('div', attrs={'class': 'ma-AdCard'}):
-    print('here' + foo.text)
-
-'''
