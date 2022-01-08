@@ -3,13 +3,22 @@ Created on 3 ene. 2022
 @author: pedfernandez
 '''
 
+import logging
 from selenium import webdriver
-#from selenium.webdriver.chrome.service import Service
-#from selenium.webdriver.common.by import By  # for locating elements
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By  # for locating elements
 import time
 import datetime
-import pandas as pd
-from pandas import DataFrame
+import random
+import os
+#from selenium.webdriver.chrome.service import Service
+#import pandas as pd
+#from pandas import DataFrame
+
+logging.basicConfig(
+    format="%(asctime)-15s [%(levelname)s] %(funcName)s: %(message)s",
+    level=logging.INFO)
 
 '''
 def run_collection(driver):
@@ -43,25 +52,49 @@ def run_collection(driver):
                 continue
 '''
 
-link = "https://www.milanuncios.com/coches-de-segunda-mano/?demanda=n&orden=date&fromSearch=1"
-execution_timestamp = datetime.datetime.now()
-
-print('Execution starts:', execution_timestamp)
 
 def accept_terms(browser):
-    button_class = 'sui-AtomButton sui-AtomButton--primary sui-AtomButton--solid sui-AtomButton--center '
-    browser.find_element_by_class_name(button_class).click()
+    logging.info('Start')
+    button_xpath = '//*[@id="app"]/div[2]/div[1]/div/div/div/footer/div/button[2]'
+    WebDriverWait(browser, 10).until(
+        EC.element_to_be_clickable((By.XPATH, button_xpath))
+    ).click()
+    logging.info('End')
+
+def scroll_down(browser):
+    logging.info('Start')
+    browser.execute_script('window.scrollTo(0,document.body.scrollHeight)')
+    logging.info('End')
+
+def printing_html(browser, outfile):
+    logging.info('Start')
+    logging.info('Getting page source...')
+    html = browser.page_source
+    logging.info('Writing to file: ' + outfile)
+    f = open(outfile, 'w')
+    f.write(html)
+    logging.info('End')
+
+# Variables
+link = "https://www.milanuncios.com/coches-de-segunda-mano/?demanda=n&orden=date&fromSearch=1"
+execution_timestamp = datetime.datetime.now()
+project_folder = os.getcwd()
+raw_data_folder = 'pegaso-collect/raw-data'
+raw_file = raw_data_folder + '/data_' + str(execution_timestamp).replace(':', '-').replace('.', '').replace(' ', '_')
 
 chrome_browser = webdriver.Chrome('/home/pietari/chromedriver/chromedriver')
-chrome_browser.implicitly_wait(10)
 
 chrome_browser.get(link)
-time.sleep(2.5)
+time.sleep(random.uniform(8, 12))
 
 accept_terms(chrome_browser)
-time.sleep(2.5)
+time.sleep(random.uniform(2, 5))
 
-print('Execution finished', datetime.datetime.now())
+scroll_down(chrome_browser)
+time.sleep(random.uniform(8, 12))
+
+printing_html(chrome_browser, raw_file + '_1.html')
+time.sleep(random.uniform(2, 4))
 
 '''path_element = chrome_browser.find_elements(By.CLASS_NAME, "ma-AdList")
 print(len(path_element))
