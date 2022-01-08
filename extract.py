@@ -21,6 +21,7 @@ logging.basicConfig(
     level=logging.INFO)
 
 def initial_checks(data_folder):
+    time_start = time.time()
     logging.info('Start')
     if not os.path.exists(data_folder):
         logging.warning('Folder ' + data_folder + 'does not exist: creating...')
@@ -32,43 +33,68 @@ def initial_checks(data_folder):
         for i in os.listdir(data_folder):
             ic += 1
             logging.info('File ' + str(ic) + ': \'' + str(i) + '\'')
-    logging.info('End')
+    time_end = time.time()
+    logging.info('End. Elapsed time: ' + str(time_end - time_start) + ' seconds.')
+
+def go_to_link(browser, url):
+    time_start = time.time()
+    logging.info('Start')
+    logging.info('Going to page: \'' + url + '\'')
+    browser.get(url)
+    time_end = time.time()
+    logging.info('End. Elapsed time: ' + str(time_end - time_start) + ' seconds.')
 
 def accept_terms(browser):
+    time_start = time.time()
     logging.info('Start')
     button_xpath = '//*[@id="app"]/div[2]/div[1]/div/div/div/footer/div/button[2]'
     WebDriverWait(browser, 10).until(
         EC.element_to_be_clickable((By.XPATH, button_xpath))
     ).click()
-    logging.info('End')
+    time_end = time.time()
+    logging.info('End. Elapsed time: ' + str(time_end - time_start) + ' seconds.')
 
 def scroll_down(browser):
+    time_start = time.time()
     logging.info('Start')
-    browser.execute_script('window.scrollTo(0,document.body.scrollHeight)')
-    logging.info('End')
+    full_height = browser.execute_script("return document.documentElement.scrollHeight")
+    total_scrolls = 20.0
+    for i in range(1, int(total_scrolls)):
+        wait_time = random.uniform(8, 12)
+        height = int(full_height/total_scrolls*i)
+        logging.info('Scrolling to height (' + str(i) + ' of ' + str(int(total_scrolls)) + ') ' + str(height) + ' and waiting ' + str(wait_time) + ' seconds.')
+        browser.execute_script('window.scrollTo(0,' + str(height) + ')')
+        time.sleep(wait_time)
+    time_end = time.time()
+    logging.info('End. Elapsed time: ' + str(time_end - time_start) + ' seconds.')
 
 def printing_html(browser, outfile):
+    time_start = time.time()
     logging.info('Start')
     logging.info('Getting page source...')
     html = browser.page_source
     logging.info('Writing to file: ' + outfile)
     f = open(outfile, 'w')
     f.write(html)
-    logging.info('End')
+    time_end = time.time()
+    logging.info('End. Elapsed time: ' + str(time_end - time_start) + ' seconds.')
 
 # Variables
+THIS_SCRIPT_PATH = '/home/pietari/PycharmProjects/cars/pegaso-collect'
 link = "https://www.milanuncios.com/coches-de-segunda-mano/?demanda=n&orden=date&fromSearch=1"
 execution_timestamp = datetime.datetime.now()
-project_folder = os.getcwd()
-raw_data_folder = 'pegaso-collect/raw-data'
+raw_data_folder = 'raw-data'
 raw_file = raw_data_folder + '/data_' + str(execution_timestamp).replace(':', '-').replace('.', '').replace(' ', '_')
+
+# Main
+os.chdir(THIS_SCRIPT_PATH)
 
 chrome_browser = webdriver.Chrome('/home/pietari/chromedriver/chromedriver')
 
 initial_checks(raw_data_folder)
 
-chrome_browser.get(link)
-time.sleep(random.uniform(8, 12))
+go_to_link(chrome_browser, link)
+time.sleep(random.uniform(2, 5))
 
 accept_terms(chrome_browser)
 time.sleep(random.uniform(2, 5))
