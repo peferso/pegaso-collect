@@ -20,38 +20,6 @@ logging.basicConfig(
     format="%(asctime)-15s [%(levelname)s] %(funcName)s: %(message)s",
     level=logging.INFO)
 
-'''
-def run_collection(driver):
-    path_element = []
-    links = []
-    path_element = driver.find_elements_by_class_name("item-info-container")
-    links = driver.find_elements_by_class_name("item-link")
-    print('len(path_element)', len(path_element))
-    print('len(links)', len(links))
-
-    if len(path_element) == 0:
-        sys.exit('Error: getting empty list of web element.\nMaybe the element was not found')
-
-    for iart in range(1, len(path_element) + 1):
-        print('\n =============== \nItem', iart)
-        path_element = driver.find_elements_by_class_name("item-info-container")
-        links = driver.find_elements_by_class_name("item-link")
-        result = path_element[iart - 1].text
-        self.id = self.id + 1
-        self.get_entry_provide_values(result)
-        link = links[iart - 1]
-        self.get_links_provide_values(driver, link)
-
-        if (self.id == 1):
-            self.oldestitemname = self.listnames[0]
-        else:
-            if (self.oldestitemname == self.listnames[-1]):
-                self.stopnow = True
-                self.last_article = iart
-            else:
-                continue
-'''
-
 def initial_checks(data_folder):
     logging.info('Start')
     if not os.path.exists(data_folder):
