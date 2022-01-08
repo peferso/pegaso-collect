@@ -52,6 +52,19 @@ def run_collection(driver):
                 continue
 '''
 
+def initial_checks(data_folder):
+    logging.info('Start')
+    if not os.path.exists(data_folder):
+        logging.warning('Folder ' + data_folder + 'does not exist: creating...')
+        os.makedirs(data_folder)
+    else:
+        logging.info('Folder \'' + data_folder + '\' exists: not creating.')
+        logging.info('Folder \'' + data_folder + '\' contains the following files:')
+        ic = 0
+        for i in os.listdir(data_folder):
+            ic += 1
+            logging.info('File ' + str(ic) + ': \'' + str(i) + '\'')
+    logging.info('End')
 
 def accept_terms(browser):
     logging.info('Start')
@@ -83,6 +96,8 @@ raw_data_folder = 'pegaso-collect/raw-data'
 raw_file = raw_data_folder + '/data_' + str(execution_timestamp).replace(':', '-').replace('.', '').replace(' ', '_')
 
 chrome_browser = webdriver.Chrome('/home/pietari/chromedriver/chromedriver')
+
+initial_checks(raw_data_folder)
 
 chrome_browser.get(link)
 time.sleep(random.uniform(8, 12))
