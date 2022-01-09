@@ -32,6 +32,39 @@ def parse_for_exact_string(data_list, word):
             value = 'FALSE'
     return value
 
+def create_data_frame(lists):
+    print('creating the data frame\n ...')
+    cars = {
+            'id':                 lists[0],
+            'price_c':            lists[1],
+            'price_f':            lists[2],
+            'kilometers':         lists[3],
+            'power':              lists[4],
+            'doors':              lists[5],
+            'profesional_vendor': lists[6],
+            'automatic_gearbox':  lists[7],
+            'source':             lists[8]
+             }
+    for i in lists:
+        print('length', len(i))
+
+    df = DataFrame(cars, columns=['id',
+                                  'price_c',
+                                  'price_f',
+                                  'kilometers',
+                                  'power',
+                                  'doors',
+                                  'profesional_vendor',
+                                  'automatic_gearbox',
+                                  'source'
+                                  ])
+
+    print('exporting data frame\n ...')
+    export_csv = df.to_csv(r'test.csv', index=None, header=True)
+
+    print('let us print a few lines of the data frame\n ...')
+    print(df.head())
+
 # Variables
 THIS_SCRIPT_PATH = '/home/pietari/PycharmProjects/cars/pegaso-collect'
 raw_data_folder = 'raw-data'
@@ -47,6 +80,7 @@ parsed_html = BeautifulSoup(html, features="html.parser")
 items = parsed_html.body.find_all('div', attrs={'class':'ma-AdCard-detail'})
 print('There are ' + str(len(items)) + ' ads in this file.')
 
+l_id = []
 l_price_c = []
 l_price_f = []
 l_kilometers = []
@@ -58,7 +92,11 @@ l_source = []
 
 name_separator_left = '<a class="ma-AdCard-titleLink" data-e2e="ma-AdCard-titleLink"'
 name_separator_right = '<'
+
+id_c = 0
+
 for advertise in items:
+    id_c += 1
     ad_contents = advertise.contents
     information = str(ad_contents[0]).split(name_separator_left)[-1].split('>')[1]
     name = information.split(name_separator_right)[0]
@@ -81,8 +119,9 @@ for advertise in items:
     power = parse_for_ending_characters(data_list, 'CV')
     doors = parse_for_ending_characters(data_list, 'puertas')
     profesional_vendor = parse_for_exact_string(data_list, 'Profesional')
-    automatic_gearbox = parse_for_exact_string(data_list, 'Automatico')
+    automatic_gearbox = parse_for_exact_string(data_list, 'Automático')
 
+    l_id.append(str(id_c) + str(html_file.split('/')[-1]))
     l_price_c.append(price_c)
     l_price_f.append(price_f)
     l_kilometers.append(kilometers)
@@ -106,3 +145,16 @@ for advertise in items:
     print('price (financed): ' + price_f)
 
 f.close()
+
+lists = [
+    l_id,
+    l_price_c,
+    l_price_f,
+    l_kilometers,
+    l_power,
+    l_doors,
+    l_profesional_vendor,
+    l_automatic_gearbox,
+    l_source
+]
+create_data_frame(lists)
