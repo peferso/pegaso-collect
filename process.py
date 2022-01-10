@@ -147,8 +147,8 @@ def parse_html_file(html, lists):
         ad_contents = advertise.contents
         information = str(ad_contents[0]).split(name_separator_left)[-1].split('>')[1]
         name = information.split(name_separator_right)[0]
-        brand = name.split('-')[0].replace(' ', '')
-        model = name.split('-')[-1].replace(' ', '', 1)
+        brand = name.split('-', 1)[0].replace(' ', '')
+        model = name.split('-', 1)[-1].replace(' ', '', 1)
         # Extract data
         information = str(ad_contents[1]).split('span class')
         ii = 0
@@ -221,7 +221,7 @@ def parse_html_file(html, lists):
 
 
 # Variables
-THIS_SCRIPT_PATH = '/home/pietari/PycharmProjects/cars/pegaso-collect'
+THIS_SCRIPT_PATH = os.environ['PEGASUS_DIR']
 raw_data_folder = 'raw-data'
 processed_data_folder = 'processed-data'
 html_file = raw_data_folder + '/data_2022-01-08_16-39-37032217_1.html'

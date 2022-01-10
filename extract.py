@@ -12,7 +12,6 @@ import time
 import datetime
 import random
 import os
-#from selenium.webdriver.chrome.service import Service
 
 
 logging.basicConfig(
@@ -79,8 +78,9 @@ def printing_html(browser, outfile):
     logging.info('End. Elapsed time: ' + str(time_end - time_start) + ' seconds.')
 
 # Variables
-THIS_SCRIPT_PATH = '/home/pietari/PycharmProjects/cars/pegaso-collect'
-link = "https://www.milanuncios.com/coches-de-segunda-mano/?demanda=n&orden=date&fromSearch=1"
+THIS_SCRIPT_PATH = os.environ['PEGASUS_DIR']
+link = os.environ['URL']
+driver_path = os.environ['CHROMEDRIVER_DIR']
 execution_timestamp = datetime.datetime.now()
 raw_data_folder = 'raw-data'
 raw_file = raw_data_folder + '/data_' + str(execution_timestamp).replace(':', '-').replace('.', '').replace(' ', '_')
@@ -88,18 +88,25 @@ raw_file = raw_data_folder + '/data_' + str(execution_timestamp).replace(':', '-
 # Main
 os.chdir(THIS_SCRIPT_PATH)
 
-chrome_browser = webdriver.Chrome('/home/pietari/chromedriver/chromedriver')
+chrome_browser = webdriver.Chrome(driver_path)
 
 initial_checks(raw_data_folder)
 
-go_to_link(chrome_browser, link)
-time.sleep(random.uniform(2, 5))
+new_browser = True
 
-accept_terms(chrome_browser)
-time.sleep(random.uniform(2, 5))
+for page_number in range(1, 200):
 
-scroll_down(chrome_browser)
-time.sleep(random.uniform(8, 12))
+    go_to_link(chrome_browser, link + str(page_number))
+    time.sleep(random.uniform(2, 5))
 
-printing_html(chrome_browser, raw_file + '_1.html')
-time.sleep(random.uniform(2, 4))
+    if new_browser:
+        accept_terms(chrome_browser)
+        time.sleep(random.uniform(2, 5))
+        new_browser = False
+
+    scroll_down(chrome_browser)
+    time.sleep(random.uniform(8, 12))
+
+    printing_html(chrome_browser, raw_file + '_' + str(page_number) + '.html')
+    time.sleep(random.uniform(2, 4))
+
