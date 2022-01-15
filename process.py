@@ -1,3 +1,8 @@
+'''
+Created on 8 ene. 2022
+@author: pedfernandez
+'''
+
 import os
 import logging
 from bs4 import BeautifulSoup
@@ -221,7 +226,7 @@ def parse_html_file(html, lists):
 
 
 # Variables
-THIS_SCRIPT_PATH = os.environ['PEGASUS_DIR']
+THIS_SCRIPT_PATH = os.environ['PEGASO_DIR']
 raw_data_folder = 'raw-data'
 processed_data_folder = 'processed-data'
 html_file = raw_data_folder + '/data_2022-01-08_16-39-37032217_1.html'

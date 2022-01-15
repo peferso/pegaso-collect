@@ -78,7 +78,7 @@ def printing_html(browser, outfile):
     logging.info('End. Elapsed time: ' + str(time_end - time_start) + ' seconds.')
 
 # Variables
-THIS_SCRIPT_PATH = os.environ['PEGASUS_DIR']
+THIS_SCRIPT_PATH = os.environ['PEGASO_DIR']
 link = os.environ['URL']
 driver_path = os.environ['CHROMEDRIVER_DIR']
 execution_timestamp = datetime.datetime.now()
@@ -94,7 +94,7 @@ initial_checks(raw_data_folder)
 
 new_browser = True
 
-for page_number in range(1, 200):
+for page_number in range(200, 200+1):
 
     go_to_link(chrome_browser, link + str(page_number))
     time.sleep(random.uniform(2, 5))
