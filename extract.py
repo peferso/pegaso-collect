@@ -78,7 +78,7 @@ def printing_html(browser, outfile):
     logging.info('End. Elapsed time: ' + str(time_end - time_start) + ' seconds.')
 
 # Variables
-THIS_SCRIPT_PATH = os.environ['PEGASO_DIR']
+THIS_SCRIPT_PATH = os.environ['PEGASO_COLLT_DIR']
 link = os.environ['URL']
 driver_path = os.environ['CHROMEDRIVER_DIR']
 execution_timestamp = datetime.datetime.now()
@@ -109,4 +109,3 @@ for page_number in range(200, 200+1):
 
     printing_html(chrome_browser, raw_file + '_' + str(page_number) + '.html')
     time.sleep(random.uniform(2, 4))
-
