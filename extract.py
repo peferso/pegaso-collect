@@ -94,7 +94,7 @@ initial_checks(raw_data_folder)
 
 new_browser = True
 
-for page_number in range(200, 200+1):
+for page_number in range(1, 200+1):
 
     go_to_link(chrome_browser, link + str(page_number))
     time.sleep(random.uniform(2, 5))

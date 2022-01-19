@@ -155,7 +155,10 @@ def parse_html_file(html, lists):
         brand = name.split('-', 1)[0].replace(' ', '')
         model = name.split('-', 1)[-1].replace(' ', '', 1)
         # Extract data
-        information = str(ad_contents[1]).split('span class')
+        if len(ad_contents) < 2:
+            break
+        else:
+            information = str(ad_contents[1]).split('span class')
         ii = 0
         data_list = []
         for itm in information:
