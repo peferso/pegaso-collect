@@ -1,3 +1,6 @@
+TODO:
+- Add first step to all .py files that loads the environment variables via ```~/.profile_PEGASO``` 
+
 # pegaso-collect
 
 The scripts in this repository use the following unix environment variables:
