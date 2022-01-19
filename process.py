@@ -68,6 +68,46 @@ def parse_for_year(data_list):
             value = 'NULL'
     return value
 
+def parse_brand_model(name):
+    first_word = name.split(' ')[0]
+    len1 = 3
+    len2 = 11
+    len3 = 4
+    len4 = 9
+    len5 = 5
+    len6 = 6
+    if len(first_word) >= len1:
+        ln = len1
+        if first_word[0:ln].upper() == 'BMW':
+            name = name[0:ln] + '-' + name[ln-1:]
+    if len(first_word) >= len2:
+        ln = len2
+        if first_word[0:ln].upper() == 'VOLKSWAGEN':
+            name = name[0:ln] + '-' + name[ln-1:]
+    if len(first_word) >= len3:
+        ln = len3
+        if first_word[0:ln].upper() == 'SEAT':
+            name = name[0:ln] + '-' + name[ln-1:]
+        if first_word[0:ln].upper() == 'AUDI':
+            name = name[0:ln] + '-' + name[ln-1:]
+    if len(first_word) >= len4:
+        ln = len4
+        if first_word[0:ln].upper() == 'ALFAROMEO':
+            name = name[0:ln] + '-' + name[ln-1:]
+    if len(first_word) >= len5:
+        ln = len5
+        if first_word[0:ln].upper() == 'SMART':
+            name = name[0:ln] + '-' + name[ln-1:]
+        if first_word[0:ln].upper() == 'VOLVO':
+            name = name[0:ln] + '-' + name[ln-1:]
+    if len(first_word) >= len6:
+        ln = len6
+        if first_word[0:ln].upper() == 'TOYOTA':
+            name = name[0:ln] + '-' + name[ln-1:]
+
+    brand = name.split('-', 1)[0].replace(' ', '')
+    model = name.split('-', 1)[-1].replace(' ', '', 1)
+
 def create_data_frame(file, lists):
 
     time_start = time.time()
@@ -152,8 +192,7 @@ def parse_html_file(html, lists):
         ad_contents = advertise.contents
         information = str(ad_contents[0]).split(name_separator_left)[-1].split('>')[1]
         name = information.split(name_separator_right)[0]
-        brand = name.split('-', 1)[0].replace(' ', '')
-        model = name.split('-', 1)[-1].replace(' ', '', 1)
+        brand, model = parse_brand_model(name)
         # Extract data
         if len(ad_contents) < 2:
             break
