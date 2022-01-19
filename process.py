@@ -232,7 +232,6 @@ def parse_html_file(html, lists):
 THIS_SCRIPT_PATH = os.environ['PEGASO_COLLT_DIR']
 raw_data_folder = 'raw-data'
 processed_data_folder = 'processed-data'
-html_file = raw_data_folder + '/data_2022-01-08_16-39-37032217_1.html'
 
 # Main
 
