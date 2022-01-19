@@ -1,3 +1,0 @@
-USE pegaso_db;
-INSERT INTO raw_data VALUES ('1data_2022-01-17_21-41-17903791_7.html','BMW','SERIE 1 116D','18900','18900','65000','True','False','2018','data_2022-01-17_21-41-17903791_7.html','2022-01-17');
-INSERT INTO raw_data VALUES ('2data_2022-01-17_21-41-17903791_7.html','CITROEN','C4','5250','5250','199800','True','False','2011','data_2022-01-17_21-41-17903791_7.html','2022-01-17');
