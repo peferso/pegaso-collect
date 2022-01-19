@@ -1,6 +1,6 @@
 *.html
 *.csv
-*.csv
+*.sql
 
 
 # Byte-compiled / optimized / DLL files
