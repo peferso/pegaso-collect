@@ -69,6 +69,8 @@ def parse_for_year(data_list):
     return value
 
 def parse_brand_model(name):
+    # TODO:
+    # Cleanup of names and brands for titles concatenated.
     first_word = name.split(' ')[0]
     len1 = 3
     len2 = 11
@@ -107,6 +109,8 @@ def parse_brand_model(name):
 
     brand = name.split('-', 1)[0].replace(' ', '')
     model = name.split('-', 1)[-1].replace(' ', '', 1)
+
+    return brand, model
 
 def create_data_frame(file, lists):
 

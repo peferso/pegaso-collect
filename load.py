@@ -10,6 +10,7 @@ import os
 import pandas as pd
 import pymysql
 import subprocess
+import hashlib
 
 
 logging.basicConfig(
@@ -52,8 +53,6 @@ def scan_csv_files(data_folder):
     return list_of_files
 
 def generate_sql_inserts(file, sql_folder):
-    # TODO
-    # Replace 'nan' por NULL
     time_start = time.time()
     logging.info('Start')
     batch_date = file.split('_')[1]
@@ -68,6 +67,17 @@ def generate_sql_inserts(file, sql_folder):
     f = open(d_folder + '/' + batch_page + '.sql', 'w+')
     print('USE pegaso_db;', file=f, sep="','")
     for index, row in df.iterrows():
+        text = str(row['brand']).replace(' ', '').upper() + \
+               str(row['model']).replace(' ', '').upper() + \
+               str(row['price_c']).replace(' ', '').upper() + \
+               str(row['price_f']).replace(' ', '').upper() + \
+               str(row['kilometers']).replace(' ', '').upper() + \
+               str(row['power']).replace(' ', '').upper() + \
+               str(row['doors']).replace(' ', '').upper() + \
+               str(row['profesional_vendor']).replace(' ', '').upper() + \
+               str(row['automatic_gearbox']).replace(' ', '').upper() + \
+               str(row['year']).replace(' ', '').upper()
+        hashed_cols = hashlib.sha3_256(text.encode()).hexdigest()
         query = 'INSERT INTO raw_data VALUES (\'' + \
               str(row['id']) + '\',\'' + \
               str(row['brand']) + '\',\'' + \
@@ -81,6 +91,7 @@ def generate_sql_inserts(file, sql_folder):
               str(row['automatic_gearbox']) + '\',\'' + \
               str(row['year']) + '\',\'' + \
               str(row['source']) + '\',\'' + \
+              str(hashed_cols) + '\',\'' + \
               str(batch_date) + '\');'
         query = query.replace("'nan'", "NULL")
         print(query, file=f)
@@ -130,7 +141,9 @@ for batch_date in os.listdir(sql_data_folder):
 
         iq += 1
 
-        logging.info(' + Executing query file \'' + query_file + '\' (' + str(iq) + ' of ' + str(len(os.listdir(sql_data_folder + '/' + batch_date))) + ').')
+        time_start_q = time.time()
+
+        logging.info(' + Executing query file \'' + query_file + '\' (' + str(iq) + ' of ' + str(len(os.listdir(sql_data_folder + '/' + batch_date))) + ').' + ' [batch \'' + batch_date + '\' (' + str(ib) + ' of ' + str(len(os.listdir(sql_data_folder))) + ')]')
 
         file = open(sql_data_folder + '/' + batch_date + '/' + query_file, 'r')
         sql_file = file.read()
@@ -154,6 +167,8 @@ for batch_date in os.listdir(sql_data_folder):
 
         con_cursor.close()
 
-        logging.info(' + Finished query file \'' + query_file + '\' (' + str(iq) + ' of ' + str(len(os.listdir(sql_data_folder + '/' + batch_date))) + ').')
+        time_end_q = time.time()
+
+        logging.info(' + Finished query file \'' + query_file + '\' (' + str(iq) + ' of ' + str(len(os.listdir(sql_data_folder + '/' + batch_date))) + ').' + ' ' + str(time_end_q - time_start_q) + ' seconds elapsed.' + ' [batch \'' + batch_date + '\' (' + str(ib) + ' of ' + str(len(os.listdir(sql_data_folder))) + ')]')
 
 connection.close()
