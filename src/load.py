@@ -52,10 +52,17 @@ def scan_csv_files(data_folder):
     logging.info('End. Elapsed time: ' + str(time_end - time_start) + ' seconds.')
     return list_of_files
 
+def get_monday_of_week_date(input_batch_date):
+    xd = input_batch_date.split('-')
+    dt = datetime.datetime(int(xd[0]), int(xd[1]), int(xd[2]), 0, 0, 0)
+    last_monday = dt + datetime.timedelta(days=-dt.weekday(), weeks=0)
+    last_monday = str(last_monday).split(' ')[0]
+    return last_monday
+
 def generate_sql_inserts(file, sql_folder):
     time_start = time.time()
     logging.info('Start')
-    batch_date = file.split('_')[1]
+    batch_date = get_monday_of_week_date(file.split('_')[1])
     batch_page = file.split('.')[0].split('_')[-1]
     d_folder = sql_folder + '/' + batch_date
     if not os.path.exists(d_folder):
