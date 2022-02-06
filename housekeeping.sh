@@ -2,25 +2,27 @@
 
 source ~/.profile_PEGASO
 
-HTMLTARFILE=batch-html-files_`date "+%Y-%m-%d_%H-%M-%S"`.tar.gz
+RAWTARFILE=batch-raw-files_`date "+%Y-%m-%d_%H-%M-%S"`.tar.gz
 CSVTARFILE=batch-csv-files_`date "+%Y-%m-%d_%H-%M-%S"`.tar.gz
 SQLTARFILE=batch-sql-files_`date "+%Y-%m-%d_%H-%M-%S"`.tar.gz
+LOGTARFILE=batch-log-files_`date "+%Y-%m-%d_%H-%M-%S"`.tar.gz
 BCKDIR=~/Desktop/pegaso-backups/
-HTMLBCKDIR=${BCKDIR}/raw-data/
+RAWBCKDIR=${BCKDIR}/raw-data/
 CSVBCKDIR=${BCKDIR}/processed-data/
 SQLBCKDIR=${BCKDIR}/sql-data/
+LOGBCKDIR=${BCKDIR}/logs/
 
 cd ${PEGASO_COLLT_DIR}/raw-data
 
-tar -czvf ${HTMLTARFILE} *.html
+tar -czvf ${RAWTARFILE} *.html
 
-mkdir -p $HTMLBCKDIR
+mkdir -p $RAWBCKDIR
 
-mv ${HTMLTARFILE} ${HTMLBCKDIR}/${HTMLTARFILE}
+mv ${RAWTARFILE} ${RAWBCKDIR}/${RAWTARFILE}
 
 cd ${PEGASO_COLLT_DIR}/processed-data
 
-tar -czvf ${CSVTARFILE} *.html
+tar -czvf ${CSVTARFILE} *.csv
 
 mkdir -p $CSVBCKDIR
 
@@ -28,11 +30,21 @@ mv ${CSVTARFILE} ${CSVBCKDIR}/${CSVTARFILE}
 
 cd ${PEGASO_COLLT_DIR}/sql-data
 
-tar -czvf ${SQLTARFILE} *.html
+tar -czvf ${SQLTARFILE} *.sql
 
 mkdir -p $SQLBCKDIR
 
 mv ${SQLTARFILE} ${SQLBCKDIR}/${SQLTARFILE}
+
+cd ${OLDPWD}
+
+cd ${PEGASO_COLLT_DIR%/*}/logs
+
+tar -czvf ${LOGTARFILE} *.log
+
+mkdir -p $LOGBCKDIR
+
+mv ${LOGTARFILE} ${LOGBCKDIR}/${LOGTARFILE}
 
 cd ${OLDPWD}
 
