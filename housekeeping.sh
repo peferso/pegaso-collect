@@ -20,6 +20,8 @@ mkdir -p $RAWBCKDIR
 
 mv ${RAWTARFILE} ${RAWBCKDIR}/${RAWTARFILE}
 
+rm -rf ./*.html
+
 cd ${PEGASO_COLLT_DIR}/processed-data
 
 tar -czvf ${CSVTARFILE} *.csv
@@ -28,13 +30,17 @@ mkdir -p $CSVBCKDIR
 
 mv ${CSVTARFILE} ${CSVBCKDIR}/${CSVTARFILE}
 
+rm -rf ./*.csv
+
 cd ${PEGASO_COLLT_DIR}/sql-data
 
-tar -czvf ${SQLTARFILE} *.sql
+tar -czvf ${SQLTARFILE} ./*
 
 mkdir -p $SQLBCKDIR
 
 mv ${SQLTARFILE} ${SQLBCKDIR}/${SQLTARFILE}
+
+rm -rf ./*
 
 cd ${OLDPWD}
 
@@ -45,6 +51,8 @@ tar -czvf ${LOGTARFILE} *.log
 mkdir -p $LOGBCKDIR
 
 mv ${LOGTARFILE} ${LOGBCKDIR}/${LOGTARFILE}
+
+rm -rf ./*.log
 
 cd ${OLDPWD}
 

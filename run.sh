@@ -30,7 +30,7 @@ echo 'Running '${0}'... - Activating python environment. EXIT: '$?| tee -a ${LOG
 
 echo 'Running '${0}'... - Running script '${PYTHON_SCRIPT}' in the background'| tee -a ${LOGFILE}; 
 
-nohup python3 ${PYTHON_SCRIPT} >> ${LOGFILE_DET} 2>&1 & 
+python3 ${PYTHON_SCRIPT} >> ${LOGFILE_DET} 2>&1 
 
 PID_RUN=$(ps aux | grep -m1 "python3 /home/pietari/PycharmProjects/cars/pegaso-collect/src/process.py" | awk -F ' ' '{print $2}')
 
