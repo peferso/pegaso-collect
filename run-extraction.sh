@@ -4,15 +4,6 @@ source ~/.profile_PEGASO
 
 cd ${PEGASO_COLLT_DIR%/*}
 
-source bin/activate
-
-SCRIPTNAME=${0%.*}
-SCRIPTNAME=${SCRIPTNAME##*/}
-
-LOGFILE="logs/${SCRIPTNAME}_"`date "+%Y-%m-%d_%H-%M-%S"`.log
-
-python3 src/extract.py > ${LOGFILE} 2>&1 
-
-echo "\n"Execution of $0 finished: `date "+%Y-%m-%d %H:%M:%S"` > ${LOGFILE}
+run.sh extract.py
 
 cd ${OLDPWD}

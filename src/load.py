@@ -62,7 +62,8 @@ def get_monday_of_week_date(input_batch_date):
 def generate_sql_inserts(file, sql_folder):
     time_start = time.time()
     logging.info('Start')
-    batch_date = get_monday_of_week_date(file.split('_')[1])
+    batch_date = file.split('_')[1]
+    logical_batch_date = get_monday_of_week_date(file.split('_')[1])
     batch_page = file.split('.')[0].split('_')[-1]
     d_folder = sql_folder + '/' + batch_date
     if not os.path.exists(d_folder):
@@ -99,7 +100,7 @@ def generate_sql_inserts(file, sql_folder):
               str(row['year']) + '\',\'' + \
               str(row['source']) + '\',\'' + \
               str(hashed_cols) + '\',\'' + \
-              str(batch_date) + '\');'
+              str(logical_batch_date) + '\');'
         query = query.replace("'nan'", "NULL")
         print(query, file=f)
     f.close()
