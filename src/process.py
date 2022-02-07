@@ -71,44 +71,150 @@ def parse_for_year(data_list):
 def parse_brand_model(name):
     # TODO:
     # Cleanup of names and brands for titles concatenated.
+    if name.upper().split(' ')[0] == "ALFA" and name.upper().split(' ')[1] == "ROMEO":
+        name = name.replace(' ', '', 1)
+    if name.upper().split('-')[0] == "ALFA" and name.upper().split('-')[1] == "ROMEO":
+        name = name.replace('-', '', 1)
+    name = name.replace('-', '')
     first_word = name.split(' ')[0]
     len1 = 3
-    len2 = 11
+    len2 = 10
     len3 = 4
     len4 = 9
     len5 = 5
     len6 = 6
+    len7 = 2
+    len8 = 7
+    len9 = 8
+    len10 = 11
     if len(first_word) >= len1:
         ln = len1
         if first_word[0:ln].upper() == 'BMW':
-            name = name[0:ln] + '-' + name[ln-1:]
+            name = name[0:ln] + '-' + name[ln:]
+        if first_word[0:ln].upper() == 'KIA':
+            name = name[0:ln] + '-' + name[ln:]
     if len(first_word) >= len2:
         ln = len2
         if first_word[0:ln].upper() == 'VOLKSWAGEN':
-            name = name[0:ln] + '-' + name[ln-1:]
+            name = name[0:ln] + '-' + name[ln:]
+        if first_word[0:ln].upper() == 'MITSUBISHI':
+            name = name[0:ln] + '-' + name[ln:]
+        #if first_word[0:ln].upper() == 'PEUGEOT206':
+        #    name = name[0:ln-3] + '-' + name[ln-3:]
     if len(first_word) >= len3:
         ln = len3
         if first_word[0:ln].upper() == 'SEAT':
-            name = name[0:ln] + '-' + name[ln-1:]
+            name = name[0:ln] + '-' + name[ln:]
         if first_word[0:ln].upper() == 'AUDI':
-            name = name[0:ln] + '-' + name[ln-1:]
+            name = name[0:ln] + '-' + name[ln:]
+        if first_word[0:ln].upper() == 'LAND':
+            name = name[0:ln+6] + '-' + name[ln+6:]
+        if first_word[0:ln].upper() == 'OPEL':
+            name = name[0:ln] + '-' + name[ln:]
+        if first_word[0:ln].upper() == 'MINI':
+            name = name[0:ln] + '-' + name[ln:]
+        if first_word[0:ln].upper() == 'JEEP':
+            name = name[0:ln] + '-' + name[ln:]
+        if first_word[0:ln].upper() == 'FORD':
+            name = name[0:ln] + '-' + name[ln:]
+        if first_word[0:ln].upper() == 'FIAT':
+            name = name[0:ln] + '-' + name[ln:]
+        if first_word[0:ln].upper() == 'SAAB':
+            name = name[0:ln] + '-' + name[ln:]
+        if first_word[0:ln].upper() == 'DFSK':
+            name = name[0:ln] + '-' + name[ln:]
     if len(first_word) >= len4:
         ln = len4
+        if first_word[0:ln].upper() == 'SSANGYONG':
+            name = name[0:ln] + '-' + name[ln:]
+        if first_word[0:ln].upper() == 'CHEVROLET':
+            name = name[0:ln] + '-' + name[ln:]
         if first_word[0:ln].upper() == 'ALFAROMEO':
-            name = name[0:ln] + '-' + name[ln-1:]
+            name = name[0:ln] + '-' + name[ln:]
     if len(first_word) >= len5:
         ln = len5
         if first_word[0:ln].upper() == 'SMART':
-            name = name[0:ln] + '-' + name[ln-1:]
+            name = name[0:ln] + '-' + name[ln:]
         if first_word[0:ln].upper() == 'VOLVO':
-            name = name[0:ln] + '-' + name[ln-1:]
+            name = name[0:ln] + '-' + name[ln:]
+        if first_word[0:ln].upper() == 'LEXUS':
+            name = name[0:ln] + '-' + name[ln:]
+        if first_word[0:ln].upper() == 'MAZDA':
+            name = name[0:ln] + '-' + name[ln:]
+        if first_word[0:ln].upper() == 'HONDA':
+            name = name[0:ln] + '-' + name[ln:]
+        if first_word[0:ln].upper() == 'DACIA':
+            name = name[0:ln] + '-' + name[ln:]
+        if first_word[0:ln].upper() == 'SKODA':
+            name = name[0:ln] + '-' + name[ln:]
+        if first_word[0:ln].upper() == 'CUPRA':
+            name = name[0:ln] + '-' + name[ln:]
+        if first_word[0:ln].upper() == 'ISUZU':
+            name = name[0:ln] + '-' + name[ln:]
+        if first_word[0:ln].upper() == 'TESLA':
+            name = name[0:ln] + '-' + name[ln:]
+        if first_word[0:ln].upper() == 'DODGE':
+            name = name[0:ln] + '-' + name[ln:]
     if len(first_word) >= len6:
         ln = len6
         if first_word[0:ln].upper() == 'TOYOTA':
-            name = name[0:ln] + '-' + name[ln-1:]
+            name = name[0:ln] + '-' + name[ln:]
+        if first_word[0:ln].upper() == 'NISSAN':
+            name = name[0:ln] + '-' + name[ln:]
+        if first_word[0:ln].upper() == 'JAGUAR':
+            name = name[0:ln] + '-' + name[ln:]
+        if first_word[0:ln].upper() == 'LANCIA':
+            name = name[0:ln] + '-' + name[ln:]
+        if first_word[0:ln].upper() == 'DAEWOO':
+            name = name[0:ln] + '-' + name[ln:]
+        if first_word[0:ln].upper() == 'SUZUKI':
+            name = name[0:ln] + '-' + name[ln:]
+        if first_word[0:ln].upper() == 'SUBARU':
+            name = name[0:ln] + '-' + name[ln:]
+        if first_word[0:ln].upper() == 'ABARTH':
+            name = name[0:ln] + '-' + name[ln:]
+    if len(first_word) >= len7:
+        ln = len7
+        if first_word[0:ln].upper() == 'DS':
+            name = name[0:ln] + '-' + name[ln:]
+        if first_word[0:ln].upper() == 'MG':
+            name = name[0:ln] + '-' + name[ln:]
+    if len(first_word) >= len8:
+        ln = len8
+        if first_word[0:ln].upper() == 'PEUGEOT':
+            name = name[0:ln] + '-' + name[ln:]
+        if first_word[0:ln].upper() == 'RENAULT':
+            name = name[0:ln] + '-' + name[ln:]
+        if first_word[0:ln].upper() == 'PORSCHE':
+            name = name[0:ln] + '-' + name[ln:]
+        if first_word[0:ln].upper() == 'BENTLEY':
+            name = name[0:ln] + '-' + name[ln:]
+        if first_word[0:ln].upper() == 'HYUNDAI':
+            name = name[0:ln] + '-' + name[ln:]
+        if first_word[0:ln].upper() == 'CITROEN':
+            name = name[0:ln] + '-' + name[ln:]
+        if first_word[0:ln].upper() == 'FERRARI':
+            name = name[0:ln] + '-' + name[ln:]
+        if first_word[0:ln].upper() == 'INVICTA':
+            name = name[0:ln] + '-' + name[ln:]
+    if len(first_word) >= len9:
+        ln = len9
+        if first_word[0:ln].upper() == 'MERCEDES':
+            name = name[0:ln] + '-' + name[ln:]
+        if first_word[0:ln].upper() == 'INFINITI':
+            name = name[0:ln] + '-' + name[ln:]
+        if first_word[0:ln].upper() == 'MASERATI':
+            name = name[0:ln] + '-' + name[ln:]
+        if first_word[0:ln].upper() == 'CHRYSLER':
+            name = name[0:ln] + '-' + name[ln:]
+    if len(first_word) >= len10:
+        ln = len9
+        if first_word[0:ln].upper() == 'LAMBORGHINI':
+            name = name[0:ln] + '-' + name[ln:]
 
     brand = name.split('-', 1)[0].replace(' ', '')
-    model = name.split('-', 1)[-1].replace(' ', '', 1)
+    model = name.split('-', 1)[-1].lstrip()
+    #model = name.split('-', 1)[-1].replace(' ', '', 1)
 
     return brand, model
 

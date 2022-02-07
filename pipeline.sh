@@ -4,11 +4,11 @@ source ~/.profile_PEGASO
 
 cd ${PEGASO_COLLT_DIR%/*}
 
+mv *_*_INIT *_*_END_* logs/pipeline-logs
+
 # ------------------------------------------------------- #
 
 STEP=extract
-
-rm -rf ${STEP}_*_INIT ${STER}_*_END_*
 
 touch "${STEP}_`date "+%Y-%m-%d_%H-%M-%S"`_INIT"
 
@@ -22,8 +22,6 @@ touch "${STEP}_`date "+%Y-%m-%d_%H-%M-%S"`_END_${EXIT}"
 
 STEP=process
 
-rm -rf ${STEP}_*_INIT ${STER}_*_END_*
-
 touch "${STEP}_`date "+%Y-%m-%d_%H-%M-%S"`_INIT"
 
 run.sh process.py
@@ -35,8 +33,6 @@ touch "${STEP}_`date "+%Y-%m-%d_%H-%M-%S"`_END_${EXIT}"
 # ------------------------------------------------------- #
 
 STEP=load
-
-rm -rf ${STEP}_*_INIT ${STER}_*_END_*
 
 touch "${STEP}_`date "+%Y-%m-%d_%H-%M-%S"`_INIT"
 
@@ -50,8 +46,6 @@ touch "${STEP}_`date "+%Y-%m-%d_%H-%M-%S"`_END_${EXIT}"
 
 STEP=remove-duplicates
 
-rm -rf ${STEP}_*_INIT ${STER}_*_END_*
-
 touch "${STEP}_`date "+%Y-%m-%d_%H-%M-%S"`_INIT"
 
 run-remove-db-duplicates.sh
@@ -63,8 +57,6 @@ touch "${STEP}_`date "+%Y-%m-%d_%H-%M-%S"`_END_${EXIT}"
 # ------------------------------------------------------- #
 
 STEP=housekeeping
-
-rm -rf ${STEP}_*_INIT ${STER}_*_END_*
 
 touch "${STEP}_`date "+%Y-%m-%d_%H-%M-%S"`_INIT"
 

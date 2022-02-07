@@ -40,6 +40,5 @@ echo Execution of $0 finished: `date "+%Y-%m-%d %H:%M:%S"` | tee -a ${LOGFILE}
 
 echo Python output written to ${LOGFILE_DET} | tee -a ${LOGFILE}
 
-
 cd ${OLDPWD}
 
