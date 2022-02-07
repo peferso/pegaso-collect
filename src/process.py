@@ -208,7 +208,7 @@ def parse_brand_model(name):
         if first_word[0:ln].upper() == 'CHRYSLER':
             name = name[0:ln] + '-' + name[ln:]
     if len(first_word) >= len10:
-        ln = len9
+        ln = len10
         if first_word[0:ln].upper() == 'LAMBORGHINI':
             name = name[0:ln] + '-' + name[ln:]
 
