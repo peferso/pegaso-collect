@@ -5,8 +5,8 @@
 *.tar.gz
 *_END_*
 *_INIT
-
-
+nohup.out
+.idea
 logs
 logs/*
 
