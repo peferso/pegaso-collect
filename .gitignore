@@ -3,7 +3,11 @@
 *.sql
 *.log
 *.tar.gz
+*_END_*
+*_INIT
 
+
+logs
 logs/*
 
 
