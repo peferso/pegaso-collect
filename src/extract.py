@@ -58,7 +58,7 @@ def scroll_down(browser):
     full_height = browser.execute_script("return document.documentElement.scrollHeight")
     total_scrolls = 20.0
     for i in range(1, int(total_scrolls)):
-        wait_time = random.uniform(8, 12)
+        wait_time = random.uniform(4, 6)
         height = int(full_height/total_scrolls*i)
         logging.info('Scrolling to height (' + str(i) + ' of ' + str(int(total_scrolls)) + ') ' + str(height) + ' and waiting ' + str(wait_time) + ' seconds.')
         browser.execute_script('window.scrollTo(0,' + str(height) + ')')
@@ -105,7 +105,7 @@ for page_number in range(200, 0, -1):
         new_browser = False
 
     scroll_down(chrome_browser)
-    time.sleep(random.uniform(8, 12))
+    time.sleep(random.uniform(4, 6))
 
     printing_html(chrome_browser, raw_file + '_' + str(page_number) + '.html')
     time.sleep(random.uniform(2, 4))
