@@ -109,3 +109,5 @@ for page_number in range(200, 0, -1):
 
     printing_html(chrome_browser, raw_file + '_' + str(page_number) + '.html')
     time.sleep(random.uniform(2, 4))
+
+chrome_browser.close()
