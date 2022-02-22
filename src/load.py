@@ -7,6 +7,7 @@ import logging
 import time
 import datetime
 import os
+import json
 import pandas as pd
 import pymysql
 import subprocess
@@ -20,6 +21,51 @@ logging.basicConfig(
 def load_environment():
     subprocess.run(["source",
                     "~/.profile_PEGASO"], shell=True)
+
+def retrieve_aws_ec2_info():
+    time_start = time.time()
+    logging.info('Start')
+    output = os.popen(
+        'aws ec2 --region eu-west-3 \
+                 --profile ec2Manager \
+         describe-instances \
+                 --query "Reservations[].Instances[].{insId: InstanceId, pubIp: PublicIpAddress, insSt: State.Name, role: Tags[?Key == \'Role\'].Value | [0]} | []"')
+    ec2_info = output.read()
+    ec2_info = ec2_info.replace('\n', '').replace(' ', '').replace('[', '').replace(']', '').replace('},{', '}},{{').split('},{')
+    for d in ec2_info:
+        ec2_info_dict = json.load(d)
+        if ec2_info_dict['role'] == 'Database':
+            logging.info('The database instance was found: \n  ' + d )
+            found = True
+            break
+        else:
+            found = False
+    if not found:
+        logging.error('The database instance was not found! \nEnsure that it is tagged somewhere as \'Role=Database\'')
+        logging.error('Exiting now.')
+        exit()
+    time_end = time.time()
+    logging.info('End. Elapsed time: ' + str(time_end - time_start) + ' seconds.')
+    return ec2_info_dict
+
+def start_database_ec2_if_stopped():
+    time_start = time.time()
+    logging.info('Start')
+    ec2_info = retrieve_aws_ec2_info()
+    if ec2_info['insSt'].lower == 'stopped':
+        aws_command = 'aws ec2 start-instances --instance-ids ' + str(ec2_info['insId'])
+        output = os.popen(aws_command)
+        output_info = output.read()
+        # TODO: add error control by processing output_info
+        while ec2_info['insStt'].lower == 'stopped':
+            time.sleep(30)
+            ec2_info = retrieve_aws_ec2_info()
+        # TODO: complete function
+
+    time_end = time.time()
+    logging.info('End. Elapsed time: ' + str(time_end - time_start) + ' seconds.')
+
+
 
 def initial_checks(data_folder):
     time_start = time.time()
