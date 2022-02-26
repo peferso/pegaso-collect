@@ -12,7 +12,7 @@ import pandas as pd
 import pymysql
 import subprocess
 import hashlib
-
+from utils import AWSOperations
 
 logging.basicConfig(
     format="%(asctime)-15s [%(levelname)s] %(funcName)s: %(message)s",
@@ -21,51 +21,6 @@ logging.basicConfig(
 def load_environment():
     subprocess.run(["source",
                     "~/.profile_PEGASO"], shell=True)
-
-def retrieve_aws_ec2_info():
-    time_start = time.time()
-    logging.info('Start')
-    output = os.popen(
-        'aws ec2 --region eu-west-3 \
-                 --profile ec2Manager \
-         describe-instances \
-                 --query "Reservations[].Instances[].{insId: InstanceId, pubIp: PublicIpAddress, insSt: State.Name, role: Tags[?Key == \'Role\'].Value | [0]} | []"')
-    ec2_info = output.read()
-    ec2_info = ec2_info.replace('\n', '').replace(' ', '').replace('[', '').replace(']', '').replace('},{', '}},{{').split('},{')
-    for d in ec2_info:
-        ec2_info_dict = json.load(d)
-        if ec2_info_dict['role'] == 'Database':
-            logging.info('The database instance was found: \n  ' + d )
-            found = True
-            break
-        else:
-            found = False
-    if not found:
-        logging.error('The database instance was not found! \nEnsure that it is tagged somewhere as \'Role=Database\'')
-        logging.error('Exiting now.')
-        exit()
-    time_end = time.time()
-    logging.info('End. Elapsed time: ' + str(time_end - time_start) + ' seconds.')
-    return ec2_info_dict
-
-def start_database_ec2_if_stopped():
-    time_start = time.time()
-    logging.info('Start')
-    ec2_info = retrieve_aws_ec2_info()
-    if ec2_info['insSt'].lower == 'stopped':
-        aws_command = 'aws ec2 start-instances --instance-ids ' + str(ec2_info['insId'])
-        output = os.popen(aws_command)
-        output_info = output.read()
-        # TODO: add error control by processing output_info
-        while ec2_info['insStt'].lower == 'stopped':
-            time.sleep(30)
-            ec2_info = retrieve_aws_ec2_info()
-        # TODO: complete function
-
-    time_end = time.time()
-    logging.info('End. Elapsed time: ' + str(time_end - time_start) + ' seconds.')
-
-
 
 def initial_checks(data_folder):
     time_start = time.time()
@@ -155,6 +110,44 @@ def generate_sql_inserts(file, sql_folder):
     time_end = time.time()
     logging.info('End. Elapsed time: ' + str(time_end - time_start) + ' seconds.')
 
+def connect_to_database(aws):
+    time_start = time.time()
+    logging.info('Start')
+
+    aws.start_database_ec2_if_stopped()
+
+    ip = aws.get_database_public_ip()
+
+    connection = pymysql.connect(host=ip,
+                                 user=os.environ['DBUSER'],
+                                 passwd=os.environ['DBPASS'],
+                                 db="pegaso_db",
+                                 charset='utf8')
+
+    con_cursor = connection.cursor()
+
+    ready = False
+    while not ready:
+        try:
+            con_cursor.execute('select * from global_statistics;')
+            connection.commit()
+        except pymysql.err.OperationalError as msg:
+            connection = pymysql.connect(host=ip,
+                                         user=os.environ['DBUSER'],
+                                         passwd=os.environ['DBPASS'],
+                                         db="pegaso_db",
+                                         charset='utf8')
+            con_cursor = connection.cursor()
+            logging.warning("Unable to make select" + str(msg))
+            logging.warning("Waiting 120 seconds for graceful start.")
+            time.sleep(120)
+        else:
+            logging.warning("The database is ready. Proceeding")
+            ready = True
+
+    time_end = time.time()
+    logging.info('End. Elapsed time: ' + str(time_end - time_start) + ' seconds.')
+    return connection
 
 # Variables
 THIS_SCRIPT_PATH = os.environ['PEGASO_COLLT_DIR']
@@ -175,11 +168,17 @@ for csv_f in csv_files:
 
     generate_sql_inserts(csv_data_folder + '/' + csv_f, sql_data_folder)
 
-connection = pymysql.connect(host=os.environ['DBHOST'],
-                             user=os.environ['DBUSER'],
-                             passwd=os.environ['DBPASS'],
-                             #db="pegaso_db",
-                             charset='utf8')
+logging.info('Retrieving initial database state...')
+
+aws = AWSOperations()
+
+ec2_info_dict = aws.retrieve_aws_ec2_info()
+
+INIT_DB_STATE = ec2_info_dict['insSt']
+
+logging.info('Initial database state is: ' + INIT_DB_STATE)
+
+connection = connect_to_database(aws)
 
 ib = 0
 
@@ -218,6 +217,9 @@ for batch_date in os.listdir(sql_data_folder):
                 except pymysql.err.OperationalError as msg:
                     logging.warning(" ++ Command skipped: " + str(msg))
                     print(command)
+                except pymysql.err.IntegrityError as msg:
+                    logging.warning(" ++ Command skipped: " + str(msg))
+                    print(command)
 
         con_cursor.close()
 
@@ -226,3 +228,11 @@ for batch_date in os.listdir(sql_data_folder):
         logging.info(' + Finished query file \'' + query_file + '\' (' + str(iq) + ' of ' + str(len(os.listdir(sql_data_folder + '/' + batch_date))) + ').' + ' ' + str(time_end_q - time_start_q) + ' seconds elapsed.' + ' [batch \'' + batch_date + '\' (' + str(ib) + ' of ' + str(len(os.listdir(sql_data_folder))) + ')]')
 
 connection.close()
+
+if INIT_DB_STATE.lower() == 'stopped':
+
+    logging.warning("Stopping database instance to leave it in initial state...")
+
+    aws.stop_database_ec2_if_running()
+
+    logging.warning("Stopped.")
