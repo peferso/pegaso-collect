@@ -44,15 +44,19 @@ rm -rf ./*
 
 cd ${OLDPWD}
 
-cd ${PEGASO_COLLT_DIR%/*}/logs
+if [ `date +%u` -eq 6 ];
+then
 
-tar -czvf ${LOGTARFILE} *.log
+  cd ${PEGASO_COLLT_DIR%/*}/logs
 
-mkdir -p $LOGBCKDIR
+  tar -czvf ${LOGTARFILE} *.log
 
-mv ${LOGTARFILE} ${LOGBCKDIR}/${LOGTARFILE}
+  mkdir -p $LOGBCKDIR
 
-rm -rf ./*.log
+  mv ${LOGTARFILE} ${LOGBCKDIR}/${LOGTARFILE}
 
-cd ${OLDPWD}
+  rm -rf ./*.log
 
+  cd ${OLDPWD}
+
+fi
