@@ -1,11 +1,7 @@
-from utils import AWSOperations
+from utils import AWSOperations, AWSNotifications
 
-aws = AWSOperations()
+aws = AWSNotifications()
 
-print(aws.__class__)
+message = "This is a message with some detail: a. This is detail 1  b. This is detail 2"
 
-aws.stop_database_ec2_if_running()
-
-ip = aws.get_database_public_ip()
-
-print("The public IP is:", ip)
+aws.generate_json_event('load.py', 'Start', message)

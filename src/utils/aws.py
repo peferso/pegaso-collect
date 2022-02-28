@@ -2,6 +2,7 @@ import logging
 import time
 import os
 import json
+import datetime
 
 class AWSOperations():
 
@@ -118,6 +119,32 @@ class AWSOperations():
                 logging.info('Checking current database state: ' + ec2_info['insSt'])
         else:
             logging.info('Current database state: ' + ec2_info['insSt'] + ' is different from \'running\'. Not stopping')
+
+        time_end = time.time()
+        logging.info('End. Elapsed time: ' + str(time_end - time_start) + ' seconds.')
+
+class AWSNotifications():
+
+    def generate_json_event(self, script, step, message):
+        time_start = time.time()
+        logging.info('Start')
+
+        skel = [{
+            "DetailType": "EC2 Manager Notification Event",
+            "EventBusName": "ec2-manager-msg-bus",
+            "Source": "ec2.manager",
+            "Detail": "{ \"time\": \"" + str(datetime.datetime.now()) +
+                    "\", \"script\": \"" + script +
+                    "\", \"step\": \"" + step +
+                    "\", \"message\": \"" + message + "\" }"
+        }]
+
+        with open("event.json", "w") as outfile:
+            json.dump(skel, outfile)
+
+        output = os.popen('aws events put-events --profile ec2Manager --entries file://event.json').read()
+
+        print(output)
 
         time_end = time.time()
         logging.info('End. Elapsed time: ' + str(time_end - time_start) + ' seconds.')

@@ -12,7 +12,7 @@ import pandas as pd
 import pymysql
 import subprocess
 import hashlib
-from utils import AWSOperations
+from utils import AWSOperations, AWSNotifications
 
 logging.basicConfig(
     format="%(asctime)-15s [%(levelname)s] %(funcName)s: %(message)s",
@@ -176,11 +176,19 @@ ec2_info_dict = aws.retrieve_aws_ec2_info()
 
 INIT_DB_STATE = ec2_info_dict['insSt']
 
+SCRIPT = 'load.py'
+aws_n = AWSNotifications()
+aws_n.generate_json_event(SCRIPT, 'Start', 'Preparing to inject sql queries. The database initial state is ' + str(INIT_DB_STATE) + '.')
+
 logging.info('Initial database state is: ' + INIT_DB_STATE)
 
 connection = connect_to_database(aws)
 
 ib = 0
+
+nq_s = 0
+nq_f_o = 0
+nq_f_pk = 0
 
 for batch_date in os.listdir(sql_data_folder):
 
@@ -217,9 +225,13 @@ for batch_date in os.listdir(sql_data_folder):
                 except pymysql.err.OperationalError as msg:
                     logging.warning(" ++ Command skipped: " + str(msg))
                     print(command)
+                    nq_f_o += 1
                 except pymysql.err.IntegrityError as msg:
                     logging.warning(" ++ Command skipped: " + str(msg))
                     print(command)
+                    nq_f_pk += 1
+                else:
+                    nq_s += 1
 
         con_cursor.close()
 
@@ -236,3 +248,12 @@ if INIT_DB_STATE.lower() == 'stopped':
     aws.stop_database_ec2_if_running()
 
     logging.warning("Stopped.")
+
+ec2_info_dict = aws.retrieve_aws_ec2_info()
+
+aws_n.generate_json_event(SCRIPT, 'End', 'The data load has finished. The database final state is ' + str(ec2_info_dict['insSt']) + '.' +
+                          'A total of ' + str(nq_s + nq_f_o + nq_f_pk) + ' were executed, ' +
+                          str(nq_s) + ' were OK, ' + str(nq_f_pk) + ' failed due to primary key, ' + str(nq_f_o) + ' for other reasons. ' +
+                          'The queries can be tracked by batch date(s): ' +
+                          str(os.listdir(sql_data_folder)).replace('[', '').replace(']', '').replace('\'', '').replace('\"', '') )
+
