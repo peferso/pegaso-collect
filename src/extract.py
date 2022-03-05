@@ -21,13 +21,13 @@ logging.basicConfig(
 
 aws = AWSNotifications()
 
-SCRIPT = 'load.py'
+SCRIPT = 'extract.py'
 
 dw_s_t = os.popen('df -kh . | awk -F " " \'{print $4}\' | tail -1').read()
-dw_s_t_pc = os.popen('df -kh . | awk -F " " \'{print $4}\' | tail -1').read()
+dw_s_t_pc = os.popen('df -kh . | awk -F " " \'{print $5}\' | tail -1').read()
 
-aws.generate_json_event(SCRIPT, 'Start', 'The size available in the filesystem is ' + str(dw_s_t) +
-                        ', ' + str(dw_s_t_pc) + ' used.')
+aws.generate_json_event(SCRIPT, 'Start', 'The size available in the filesystem is ' + str(dw_s_t).replace('\n', '') +
+                        ', ' + str(dw_s_t_pc).replace('\n', '') + ' used.')
 
 def initial_checks(data_folder):
     time_start = time.time()
@@ -125,8 +125,9 @@ chrome_browser.close()
 
 dw_s = os.popen('du -sh raw-data | awk -F " " \'{print $1}\'').read()
 dw_s_t = os.popen('df -kh . | awk -F " " \'{print $4}\' | tail -1').read()
-dw_s_t_pc = os.popen('df -kh . | awk -F " " \'{print $4}\' | tail -1').read()
+dw_s_t_pc = os.popen('df -kh . | awk -F " " \'{print $5}\' | tail -1').read()
 
-aws.generate_json_event(SCRIPT, 'End', 'A total of ' + str(dw_s) +
-                        ' data was downloaded. The size available in the filesystem is ' + str(dw_s_t) +
-                        ', ' + str(dw_s_t_pc) + ' used.')
+
+aws.generate_json_event(SCRIPT, 'End', 'A total of ' + str(dw_s).replace('\n', '') +
+                        ' data was downloaded. The size available in the filesystem is ' + str(dw_s_t).replace('\n', '') +
+                        ', ' + str(dw_s_t_pc).replace('\n', '') + ' used.')

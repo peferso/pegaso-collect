@@ -110,6 +110,27 @@ def generate_sql_inserts(file, sql_folder):
     time_end = time.time()
     logging.info('End. Elapsed time: ' + str(time_end - time_start) + ' seconds.')
 
+def check_db_disk_usage():
+    time_start = time.time()
+    logging.info('Start')
+    ip = aws.get_database_public_ip()
+    SSH_KEYS_DIR    = os.environ['SSH_KEYS_DIR']
+    SSH_KEY_APPLCTN = os.environ['SSH_KEY_APPLCTN']
+    ssh = 'ssh -i ' + str(SSH_KEYS_DIR) + '/' + str(SSH_KEY_APPLCTN) + \
+          ' -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ec2-user@' + str(ip)
+    cmd_1 = ' "df -k" 2>/dev/null | grep /dev/xvda1 | awk -F " " \'{ print $3 }\' '
+    cmd_2 = ' "df -k" 2>/dev/null | grep /dev/xvda1 | awk -F " " \'{ print $4 }\' '
+    cmd_3 = ' "df -k" 2>/dev/null | grep /dev/xvda1 | awk -F " " \'{ print $5 }\' '
+    root_fs_disk_used = str(round(int(str(os.popen(ssh + cmd_1).read()).replace('\n', ''))/1000, 2))
+    root_fs_disk_avmb = str(round(int(str(os.popen(ssh + cmd_2).read()).replace('\n', ''))/1000, 2))
+    root_fs_disk_avpc = str(os.popen(ssh + cmd_3).read()).replace('\n', '')
+    logging.info('Amount of root db disk used (MB)      ' + root_fs_disk_used)
+    logging.info('Amount of root db disk available (MB) ' + root_fs_disk_avmb)
+    logging.info('Amount of root db disk available (%)  ' + root_fs_disk_avpc)
+    time_end = time.time()
+    logging.info('End. Elapsed time: ' + str(time_end - time_start) + ' seconds.')
+    return root_fs_disk_used, root_fs_disk_avmb, root_fs_disk_avpc
+
 def connect_to_database(aws):
     time_start = time.time()
     logging.info('Start')
@@ -118,31 +139,38 @@ def connect_to_database(aws):
 
     ip = aws.get_database_public_ip()
 
-    connection = pymysql.connect(host=ip,
-                                 user=os.environ['DBUSER'],
-                                 passwd=os.environ['DBPASS'],
-                                 db="pegaso_db",
-                                 charset='utf8')
-
-    con_cursor = connection.cursor()
-
     ready = False
     while not ready:
         try:
-            con_cursor.execute('select * from global_statistics;')
-            connection.commit()
-        except pymysql.err.OperationalError as msg:
+            logging.info('Trying to connect...')
             connection = pymysql.connect(host=ip,
                                          user=os.environ['DBUSER'],
                                          passwd=os.environ['DBPASS'],
                                          db="pegaso_db",
                                          charset='utf8')
-            con_cursor = connection.cursor()
-            logging.warning("Unable to make select" + str(msg))
+        except pymysql.err.OperationalError as msg:
+            logging.warning("Unable to connect" + str(msg))
             logging.warning("Waiting 120 seconds for graceful start.")
             time.sleep(120)
+            ready = False
         else:
-            logging.warning("The database is ready. Proceeding")
+            logging.info("The database is up. Proceeding")
+            ready = True
+
+    ready = False
+    while not ready:
+        try:
+            query='select * from global_statistics;'
+            logging.info('Trying to run a select query: \'' + query + '\'')
+            connection.cursor().execute(query)
+            connection.commit()
+        except pymysql.err.OperationalError as msg:
+            logging.warning("Unable to make select" + str(msg))
+            logging.warning("Waiting 120 seconds for graceful startup.")
+            time.sleep(120)
+            ready = False
+        else:
+            logging.info("The database is ready. Proceeding")
             ready = True
 
     time_end = time.time()
@@ -154,6 +182,7 @@ THIS_SCRIPT_PATH = os.environ['PEGASO_COLLT_DIR']
 execution_timestamp = datetime.datetime.now()
 csv_data_folder = 'processed-data'
 sql_data_folder = 'sql-data'
+mode = 'NA'# 'GENERATE_SQL_FILES'
 
 # Main
 os.chdir(THIS_SCRIPT_PATH)
@@ -164,9 +193,9 @@ initial_checks(sql_data_folder)
 
 csv_files = scan_csv_files(csv_data_folder)
 
-for csv_f in csv_files:
-
-    generate_sql_inserts(csv_data_folder + '/' + csv_f, sql_data_folder)
+if mode == 'GENERATE_SQL_FILES':
+    for csv_f in csv_files:
+        generate_sql_inserts(csv_data_folder + '/' + csv_f, sql_data_folder)
 
 logging.info('Retrieving initial database state...')
 
@@ -176,9 +205,14 @@ ec2_info_dict = aws.retrieve_aws_ec2_info()
 
 INIT_DB_STATE = ec2_info_dict['insSt']
 
+d_used, d_avmb, d_avpc = check_db_disk_usage()
+
 SCRIPT = 'load.py'
 aws_n = AWSNotifications()
-aws_n.generate_json_event(SCRIPT, 'Start', 'Preparing to inject sql queries. The database initial state is ' + str(INIT_DB_STATE) + '.')
+aws_n.generate_json_event(SCRIPT, 'Start', 'Preparing to inject sql queries. ' +
+                          'The database initial state is ' + str(INIT_DB_STATE) + '. ' +
+                          'Disk usage info in root volume -> MB used: ' + str(d_used) + '.' +
+                          ' MB available: ' + str(d_avmb) + ' (' + str(d_avpc) + ').')
 
 logging.info('Initial database state is: ' + INIT_DB_STATE)
 
@@ -251,9 +285,14 @@ if INIT_DB_STATE.lower() == 'stopped':
 
 ec2_info_dict = aws.retrieve_aws_ec2_info()
 
+d_used, d_avmb, d_avpc = check_db_disk_usage()
+
 aws_n.generate_json_event(SCRIPT, 'End', 'The data load has finished. The database final state is ' + str(ec2_info_dict['insSt']) + '.' +
                           'A total of ' + str(nq_s + nq_f_o + nq_f_pk) + ' were executed, ' +
                           str(nq_s) + ' were OK, ' + str(nq_f_pk) + ' failed due to primary key, ' + str(nq_f_o) + ' for other reasons. ' +
                           'The queries can be tracked by batch date(s): ' +
-                          str(os.listdir(sql_data_folder)).replace('[', '').replace(']', '').replace('\'', '').replace('\"', '') )
+                          str(os.listdir(sql_data_folder)).replace('[', '').replace(']', '').replace('\'', '').replace('\"', '') +
+                          '. Disk usage info in root volume -> MB used: ' + str(d_used) + '.' +
+                          ' MB available: ' + str(d_avmb) + ' (' + str(d_avpc) + ').')
+
 
