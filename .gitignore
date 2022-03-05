@@ -9,7 +9,8 @@ nohup.out
 .idea
 logs
 logs/*
-
+*.json
+*.json.swp
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

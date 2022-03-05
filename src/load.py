@@ -182,7 +182,7 @@ THIS_SCRIPT_PATH = os.environ['PEGASO_COLLT_DIR']
 execution_timestamp = datetime.datetime.now()
 csv_data_folder = 'processed-data'
 sql_data_folder = 'sql-data'
-mode = 'NA'# 'GENERATE_SQL_FILES'
+mode = 'GENERATE_SQL_FILES'
 
 # Main
 os.chdir(THIS_SCRIPT_PATH)
