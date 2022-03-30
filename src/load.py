@@ -113,6 +113,7 @@ def generate_sql_inserts(file, sql_folder):
 def check_db_disk_usage():
     time_start = time.time()
     logging.info('Start')
+    aws.start_database_ec2_if_stopped()
     ip = aws.get_database_public_ip()
     SSH_KEYS_DIR    = os.environ['SSH_KEYS_DIR']
     SSH_KEY_APPLCTN = os.environ['SSH_KEY_APPLCTN']
@@ -264,7 +265,12 @@ for batch_date in os.listdir(sql_data_folder):
                     logging.warning(" ++ Command skipped: " + str(msg))
                     print(command)
                     nq_f_pk += 1
+                except pymysql.err as msg:
+                    logging.Error(" ++ Command skipped: " + str(msg))
+                    print(command)
+                    nq_f_pk += 1
                 else:
+                    logging.info(" ++ Command executed: " + str(command))
                     nq_s += 1
 
         con_cursor.close()
@@ -274,14 +280,6 @@ for batch_date in os.listdir(sql_data_folder):
         logging.info(' + Finished query file \'' + query_file + '\' (' + str(iq) + ' of ' + str(len(os.listdir(sql_data_folder + '/' + batch_date))) + ').' + ' ' + str(time_end_q - time_start_q) + ' seconds elapsed.' + ' [batch \'' + batch_date + '\' (' + str(ib) + ' of ' + str(len(os.listdir(sql_data_folder))) + ')]')
 
 connection.close()
-
-if INIT_DB_STATE.lower() == 'stopped':
-
-    logging.warning("Stopping database instance to leave it in initial state...")
-
-    aws.stop_database_ec2_if_running()
-
-    logging.warning("Stopped.")
 
 ec2_info_dict = aws.retrieve_aws_ec2_info()
 
@@ -295,4 +293,10 @@ aws_n.generate_json_event(SCRIPT, 'End', 'The data load has finished. The databa
                           '. Disk usage info in root volume -> MB used: ' + str(d_used) + '.' +
                           ' MB available: ' + str(d_avmb) + ' (' + str(d_avpc) + ').')
 
+if INIT_DB_STATE.lower() == 'stopped':
 
+    logging.warning("Stopping database instance to leave it in initial state...")
+
+    aws.stop_database_ec2_if_running()
+
+    logging.warning("Stopped.")

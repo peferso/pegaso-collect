@@ -15,22 +15,9 @@ build_event () {
   sed -i "$REPL_TIME" event-remove-duplicates.json
   sed -i "$REPL_SCRIPT" event-remove-duplicates.json
 }
- 
-shopt -s expand_aliases
 
-source ~/.profile_PEGASO
-
-$PEGASO_INFRA_DIR/Utilities/bash-scripts/find-and-export-db-ip.sh 2>1 | tee -a ${LOGFILE}
-
-source ~/.profile_PEGASO
-
-if [ $DBHOST == "null" ];
-then
-  echo 'The database is not available.' | tee -a ${LOGFILE} 
-  echo 'Exiting.' | tee -a ${LOGFILE} 
-  exit 1
-else
- 
+remove_duplicates () {
+  
   SCRIPTNAME=${0%.*} ; SCRIPTNAME=${SCRIPTNAME##*/}
   
   LOGFILE="${PEGASO_COLLT_DIR%/*}/logs/${SCRIPTNAME}_"`date "+%Y-%m-%d_%H-%M-%S"`.log
@@ -47,11 +34,43 @@ else
 
   NUMREGAFTER=`run_database_procedure < query.sql 2>/dev/null`
   
-  build_event "Start" "Table raw_data has $NUMREGAFTER registers after deleting duplicates. A total of $((NUMREGBFORE-NUMREGAFTER)) registers was deleted"
+  build_event "Start" "Table raw_data has $NUMREGAFTER registers after deleting duplicates. A total of $((NUMREGBFORE-NUMREGAFTER)) registers were deleted"
 
   aws events put-events --profile ec2Manager --entries file://event-remove-duplicates.json
   
   echo Execution of $0 finished: `date "+%Y-%m-%d %H:%M:%S"` | tee -a ${LOGFILE}
+
+}
+ 
+shopt -s expand_aliases
+
+source ~/.profile_PEGASO
+
+$PEGASO_INFRA_DIR/Utilities/bash-scripts/find-and-export-db-ip.sh 2>1 | tee -a ${LOGFILE}
+
+source ~/.profile_PEGASO
+
+if [ $DBHOST == "null" ];
+then
+
+  echo 'The database is not available.' | tee -a ${LOGFILE} 
+  echo 'Starting' | tee -a ${LOGFILE} 
+ 
+  start_db
+
+  sleep 180
+
+  source ~/.profile_PEGASO
+  
+  remove_duplicates
+
+  stop_db
+
+  echo 'Stopping' | tee -a ${LOGFILE} 
+
+else
+
+  remove_duplicates
 
 fi
 
