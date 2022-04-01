@@ -1,1 +1,0 @@
-use pegaso_db; call remove_repeated_items_per_week();
