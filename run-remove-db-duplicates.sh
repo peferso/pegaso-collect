@@ -17,6 +17,10 @@ build_event () {
 }
 
 remove_duplicates () {
+
+  shopt -s expand_aliases
+
+  source ~/.profile_PEGASO
   
   SCRIPTNAME=${0%.*} ; SCRIPTNAME=${SCRIPTNAME##*/}
   
@@ -30,7 +34,9 @@ remove_duplicates () {
 
   aws events put-events --profile ec2Manager --entries file://event-remove-duplicates.json
 
-  run_database_procedure < $PEGASO_INFRA_DIR/Utilities/sql/run_procedure_remove_rptd_itms.sql 2>1 | tee -a ${LOGFILE}
+  RUNPROCEDURE=`run_database_procedure < $PEGASO_INFRA_DIR/Utilities/sql/run_procedure_remove_rptd_itms.sql 2>1`
+
+  echo ${RUNPROCEDURE} | tee -a ${LOGFILE}
 
   NUMREGAFTER=`run_database_procedure < query.sql 2>/dev/null`
   
@@ -46,11 +52,7 @@ shopt -s expand_aliases
 
 source ~/.profile_PEGASO
 
-$PEGASO_INFRA_DIR/Utilities/bash-scripts/find-and-export-db-ip.sh 2>1 | tee -a ${LOGFILE}
-
-source ~/.profile_PEGASO
-
-if [ $DBHOST == "null" ];
+if [ `get_db_ip` == "null" ];
 then
 
   echo 'The database is not available.' | tee -a ${LOGFILE} 

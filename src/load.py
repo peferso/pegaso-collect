@@ -18,10 +18,6 @@ logging.basicConfig(
     format="%(asctime)-15s [%(levelname)s] %(funcName)s: %(message)s",
     level=logging.INFO)
 
-def load_environment():
-    subprocess.run(["source",
-                    "~/.profile_PEGASO"], shell=True)
-
 def initial_checks(data_folder):
     time_start = time.time()
     logging.info('Start')
@@ -63,7 +59,7 @@ def get_monday_of_week_date(input_batch_date):
 def generate_sql_inserts(file, sql_folder):
     time_start = time.time()
     logging.info('Start')
-    batch_date = file.split('_')[1]
+    batch_date = file.split('_')[1] + '_' + file.split('_')[2]
     logical_batch_date = get_monday_of_week_date(file.split('_')[1])
     batch_page = file.split('.')[0].split('_')[-1]
     d_folder = sql_folder + '/' + batch_date
@@ -121,10 +117,19 @@ def check_db_disk_usage():
           ' -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no ec2-user@' + str(ip)
     cmd_1 = ' "df -k" 2>/dev/null | grep /dev/xvda1 | awk -F " " \'{ print $3 }\' '
     cmd_2 = ' "df -k" 2>/dev/null | grep /dev/xvda1 | awk -F " " \'{ print $4 }\' '
-    cmd_3 = ' "df -k" 2>/dev/null | grep /dev/xvda1 | awk -F " " \'{ print $5 }\' '
-    root_fs_disk_used = str(round(int(str(os.popen(ssh + cmd_1).read()).replace('\n', ''))/1000, 2))
-    root_fs_disk_avmb = str(round(int(str(os.popen(ssh + cmd_2).read()).replace('\n', ''))/1000, 2))
-    root_fs_disk_avpc = str(os.popen(ssh + cmd_3).read()).replace('\n', '')
+    stdout_l = []
+    for cmd in [cmd_1, cmd_2]:
+        logging.info('Trying ' + ssh + cmd)
+        try:
+            stdout = str(round(int(str(os.popen(ssh + cmd).read()).replace('\n', ''))/1000, 2))
+        except ValueError as msg:
+            logging.warning('Could not run command ' + cmd + '.')
+            stdout_l.append(-1)
+        else:
+            stdout_l.append(stdout)
+    root_fs_disk_used = stdout_l[0]
+    root_fs_disk_avmb = stdout_l[1]
+    root_fs_disk_avpc = str(round(float(root_fs_disk_avmb) / (float(root_fs_disk_avmb) + float(root_fs_disk_avmb) + 0.0000001)*100, 2))
     logging.info('Amount of root db disk used (MB)      ' + root_fs_disk_used)
     logging.info('Amount of root db disk available (MB) ' + root_fs_disk_avmb)
     logging.info('Amount of root db disk available (%)  ' + root_fs_disk_avpc)
@@ -187,8 +192,6 @@ mode = 'GENERATE_SQL_FILES'
 
 # Main
 os.chdir(THIS_SCRIPT_PATH)
-
-load_environment()
 
 initial_checks(sql_data_folder)
 
@@ -268,7 +271,7 @@ for batch_date in os.listdir(sql_data_folder):
                 except pymysql.err as msg:
                     logging.Error(" ++ Command skipped: " + str(msg))
                     print(command)
-                    nq_f_pk += 1
+                    nq_f_o += 1
                 else:
                     logging.info(" ++ Command executed: " + str(command))
                     nq_s += 1

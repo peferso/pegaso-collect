@@ -9,6 +9,7 @@ from bs4 import BeautifulSoup
 import time
 import pandas as pd
 from pandas import DataFrame
+import re
 
 logging.basicConfig(
     format="%(asctime)-15s [%(levelname)s] %(funcName)s: %(message)s",
@@ -49,6 +50,24 @@ def parse_for_ending_characters(data_list, chars):
                 value = 'NULL'
         else:
             value = 'NULL'
+    return value
+
+def parse_for_power(data_list, model):
+    i = model.find('CV')
+    if i < 0:
+        value = parse_for_ending_characters(data_list, 'CV')
+    else:
+        value = model.split('CV')[0].split(' ')
+        value = list(filter(None, value))[-1]
+        #value = re.sub("[^0-9]", "", value)
+        try:
+            val = re.search('[a-zA-Z]+', value)
+            contains_alpha = val[0].isalpha()
+        except TypeError:
+            return value
+        else:
+            last_letter = list(re.finditer(r'[a-z]', value, re.I))[-1]
+            value = value[last_letter.start()+1:]
     return value
 
 def parse_for_exact_string(data_list, word):
@@ -286,12 +305,12 @@ def parse_html_file(html, lists):
     l_source = lists[11]
 
     parsed_html = BeautifulSoup(html, features="html.parser")
-    items = parsed_html.body.find_all('div', attrs={'class': 'ma-AdCard-detail'})
+    itm_class = 'ma-AdCardV2-upperGroup'
+#    itm_class = 'ma-AdCard-detail'
+    items = parsed_html.body.find_all('div', attrs={'class': itm_class})
 
     logging.info('Parsing a file containing ' + str(len(items)) + ' items.')
 
-    name_separator_left = '<a class="ma-AdCard-titleLink" data-e2e="ma-AdCard-titleLink"'
-    name_separator_right = '<'
     id_c = 0
 
     for advertise in items:
@@ -300,14 +319,15 @@ def parse_html_file(html, lists):
 
         # Extract name
         ad_contents = advertise.contents
-        information = str(ad_contents[0]).split(name_separator_left)[-1].split('>')[1]
-        name = information.split(name_separator_right)[0]
+        name = str(ad_contents[0]).split('<h2')[-1].split('</h2')[0].split('>')[-1]
         brand, model = parse_brand_model(name)
+
         # Extract data
         if len(ad_contents) < 2:
             break
         else:
-            information = str(ad_contents[1]).split('span class')
+            information = ''.join(map(str, ad_contents))#str(ad_contents[1]) + ad_contents[1]
+            information = information.split('span class')
         ii = 0
         data_list = []
         for itm in information:
@@ -319,7 +339,7 @@ def parse_html_file(html, lists):
         price_c = parse_for_prices(data_list, 'Precio al contado')
         price_f = parse_for_prices(data_list, 'Precio financiado')
         kilometers = parse_for_ending_characters(data_list, 'kms')
-        power = parse_for_ending_characters(data_list, 'CV')
+        power = parse_for_power(data_list, model)
         doors = parse_for_ending_characters(data_list, 'puertas')
         profesional_vendor = parse_for_exact_string(data_list, 'Profesional')
         automatic_gearbox = parse_for_exact_string(data_list, 'Automático')
@@ -377,6 +397,9 @@ def parse_html_file(html, lists):
     return lists
 
 
+time_start = time.time()
+logging.info('START.')
+
 # Variables
 THIS_SCRIPT_PATH = os.environ['PEGASO_COLLT_DIR']
 raw_data_folder = 'raw-data'
@@ -431,3 +454,6 @@ for html_file in os.listdir(raw_data_folder):
     f.close()
 
     create_data_frame(processed_file, lists)
+
+time_end = time.time()
+logging.info('END. Elapsed time: ' + str(time_end - time_start) + ' seconds.')

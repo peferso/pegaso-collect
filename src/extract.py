@@ -67,10 +67,10 @@ def scroll_down(browser):
     time_start = time.time()
     logging.info('Start')
     full_height = browser.execute_script("return document.documentElement.scrollHeight")
-    total_scrolls = 20.0
-    for i in range(1, int(total_scrolls)):
-        wait_time = random.uniform(4, 6)
-        height = int(full_height/total_scrolls*i)
+    total_scrolls = int(random.uniform(19, 26))
+    for i in range(1, int(total_scrolls) + 1):
+        wait_time = random.uniform(2, 3)
+        height = int(full_height/float(total_scrolls)*i)
         logging.info('Scrolling to height (' + str(i) + ' of ' + str(int(total_scrolls)) + ') ' + str(height) + ' and waiting ' + str(wait_time) + ' seconds.')
         browser.execute_script('window.scrollTo(0,' + str(height) + ')')
         time.sleep(wait_time)
@@ -99,13 +99,23 @@ raw_file = raw_data_folder + '/data_' + str(execution_timestamp).replace(':', '-
 # Main
 os.chdir(THIS_SCRIPT_PATH)
 
-chrome_browser = webdriver.Chrome(driver_path)
-
 initial_checks(raw_data_folder)
 
 new_browser = True
 
+time_start = time.time()
+
+time_last_br = time_start
+
 for page_number in range(200, 0, -1):
+
+    chrome_browser = webdriver.Chrome(driver_path)
+
+    elapsed_time = time.time() - time_last_br
+
+    if elapsed_time > 600:
+        time_last_br = time.time()
+        random.uniform(60, 300)
 
     go_to_link(chrome_browser, link + str(page_number))
     time.sleep(random.uniform(2, 5))
@@ -120,6 +130,9 @@ for page_number in range(200, 0, -1):
 
     printing_html(chrome_browser, raw_file + '_' + str(page_number) + '.html')
     time.sleep(random.uniform(2, 4))
+
+    new_browser = True
+    chrome_browser.close()
 
 chrome_browser.close()
 

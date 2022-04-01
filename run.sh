@@ -1,7 +1,5 @@
 #!/bin/bash
 
-source ~/.profile_PEGASO
-
 if (( $# != 1 )); then
     echo "Invalid number of parameters."
     echo "Please, invoke this script providing the target python script as in the following example:"
