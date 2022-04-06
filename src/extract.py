@@ -66,7 +66,20 @@ def accept_terms(browser):
 def scroll_down(browser):
     time_start = time.time()
     logging.info('Start')
+    time.sleep(random.uniform(5, 7))
     full_height = browser.execute_script("return document.documentElement.scrollHeight")
+    full_height_old = full_height
+    reached_bottom = False
+    while not reached_bottom:
+        browser.execute_script('window.scrollTo(0,' + str(full_height / 2.0) + ')')
+        time.sleep(random.uniform(5, 7))
+        full_height = browser.execute_script("return document.documentElement.scrollHeight")
+        print(full_height_old, full_height)
+        if full_height_old == full_height:
+            reached_bottom = True
+        else:
+            full_height_old = full_height
+    browser.execute_script('window.scrollTo(0,' + str(0) + ')')
     total_scrolls = int(random.uniform(19, 26))
     for i in range(1, int(total_scrolls) + 1):
         wait_time = random.uniform(2, 3)
